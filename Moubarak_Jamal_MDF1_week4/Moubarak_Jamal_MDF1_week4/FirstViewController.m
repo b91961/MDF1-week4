@@ -10,6 +10,7 @@
 #import "DetailViewController.h"
 #import "CustomCell.h"
 #import "CurrencyCustomClass.h"
+#import "DataManager.h"
 
 @interface FirstViewController ()
 
@@ -17,12 +18,10 @@
 
 @implementation FirstViewController
 
-@synthesize _myTableView;
+@synthesize _myTableView, _symbol, _bid, _last;
 
 - (void)viewDidLoad
 {
-    //symbols = nil;
-    
     rates = [[NSMutableArray alloc] init];
     
     url = [[NSURL alloc] initWithString:@"http://rates.fxcm.com/RatesXML"];
@@ -84,6 +83,16 @@
         }
     }
     
+    //find the location to save data to
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    
+    //go into directory and name file
+    NSString *fullPath = [[NSString alloc] initWithFormat:@"%@/%@", documentsDirectory, @"RatesXML.xml"];
+    
+    //write data to new file
+    [requestData writeToFile:fullPath atomically:true];
+    
     NSData *xmlData = [self GetFileDataFromFile:@"RatesXML.xml"];
     
     NSXMLParser *parser = [[NSXMLParser alloc] initWithData:xmlData];
@@ -93,10 +102,15 @@
         [parser parse];
     }
         
-    NSLog(@"%@", requestString);
+    //NSLog(@"%@", requestString);
     
     [_myTableView reloadData];
     
+}
+
+-(IBAction)onReload:(id)sender
+{
+    [_myTableView reloadData];
 }
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
@@ -104,13 +118,9 @@
     //we are parsing the rates tag
     if ([elementName isEqualToString:@"Rate"])
     {
-        NSString *symbol = [attributeDict valueForKey:@"Symbol"];
-        NSString *bid = [attributeDict valueForKey:@"Bid"];
-        NSString *last = [attributeDict valueForKey:@"Last"];
+        symbol = [attributeDict valueForKey:@"Symbol"];
         
-        NSInteger rateItems = [bid intValue];
-        
-        NSLog(@"Symbol: %@, Bid: %d, Last: %@", symbol, rateItems, last);
+        NSLog(@"Symbol: %@, Bid: %@, Last: %@", symbol, bid, last);
         
         CurrencyCustomClass *item = [[CurrencyCustomClass alloc] initWithName:symbol rateBid:bid rateLast:last];
         if (item != nil)
@@ -118,6 +128,45 @@
             [rates addObject:item];
         }
     }
+    else if ([elementName isEqualToString:@"Bid"])
+    {
+        bid = [[NSMutableString alloc] init];
+    }
+    else if ([elementName isEqualToString:@"Last"])
+    {
+        last = [[NSMutableString alloc] init];
+    }
+}
+
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
+{
+    //  Removing whitspace and newline characters
+    string = [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    if (!currentElementValue)
+    {
+        // currentElementValue is an NSMutableString instance variable
+        currentElementValue = [[NSMutableString alloc] initWithString:string];
+    }
+    [currentElementValue appendString:string];
+    
+    //NSLog(@"Processing value for: %@", string);
+}
+
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
+{
+    if( [elementName isEqualToString:@"Bid"])
+    {
+        [bid setString:currentElementValue];
+        //NSLog(@"Processing value for bid: %@", bid);
+    }
+    else if( [elementName isEqualToString:@"Last"])
+    {
+        [last setString:currentElementValue];
+        //NSLog(@"Processing value for last: %@", last);
+    }
+
+    currentElementValue = nil;
 }
 
 -(NSData*)GetFileDataFromFile:(NSString*)filename

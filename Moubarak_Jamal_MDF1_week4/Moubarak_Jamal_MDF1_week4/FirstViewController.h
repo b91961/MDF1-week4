@@ -7,6 +7,7 @@
 //  MDF1 project 4
 
 #import <UIKit/UIKit.h>
+#import "AppDelegate.h"
 #import "CurrencyCustomClass.h"
 #import "DataManager.h"
 
@@ -22,15 +23,22 @@
     NSMutableString *currencyString;
     NSMutableArray *rates;
     
+    NSMutableString *symbol;
+    NSMutableString *bid;
+    NSMutableString *last;
+    
+    NSMutableString *currentElementValue;
+    
     IBOutlet UIButton *editButton;
     IBOutlet UITableView *myTableView;
 }
 
 @property (weak, nonatomic) IBOutlet UITableView *_myTableView;
-@property (nonatomic, retain) CurrencyCustomClass *symbol;
-@property (nonatomic, retain) CurrencyCustomClass *bid;
-@property (nonatomic, retain) CurrencyCustomClass *last;
+@property (nonatomic, retain) CurrencyCustomClass *_symbol;
+@property (nonatomic, retain) CurrencyCustomClass *_bid;
+@property (nonatomic, retain) CurrencyCustomClass *_last;
 
 -(IBAction)onClick:(id)sender;
+-(IBAction)onReload:(id)sender;
 
 @end

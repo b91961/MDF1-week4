@@ -7,6 +7,7 @@
 //  MDF1 project 4
 
 #import <UIKit/UIKit.h>
+#import "AppDelegate.h"
 #import "CurrencyCustomClass.h"
 #import "DataManager.h"
 
