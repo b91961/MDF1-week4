@@ -18,10 +18,12 @@
 
 @implementation FirstViewController
 
-@synthesize _myTableView, _symbol, _bid, _last;
+@synthesize _myTableView;
 
 - (void)viewDidLoad
 {
+    [self loadTheXML];
+    
     rates = [[NSMutableArray alloc] init];
     
     url = [[NSURL alloc] initWithString:@"http://rates.fxcm.com/RatesXML"];
@@ -104,38 +106,43 @@
         
     //NSLog(@"%@", requestString);
     
-    [_myTableView reloadData];
+    [self._myTableView reloadData];
     
-}
-
--(IBAction)onReload:(id)sender
-{
-    [_myTableView reloadData];
 }
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-    //we are parsing the rates tag
+    //we are parsing the rate tag
     if ([elementName isEqualToString:@"Rate"])
     {
         symbol = [attributeDict valueForKey:@"Symbol"];
-        
-        NSLog(@"Symbol: %@, Bid: %@, Last: %@", symbol, bid, last);
-        
-        CurrencyCustomClass *item = [[CurrencyCustomClass alloc] initWithName:symbol rateBid:bid rateLast:last];
-        if (item != nil)
-        {
-            [rates addObject:item];
-        }
     }
-    else if ([elementName isEqualToString:@"Bid"])
+    if ([elementName isEqualToString:@"Bid"])
     {
         bid = [[NSMutableString alloc] init];
     }
-    else if ([elementName isEqualToString:@"Last"])
+    if ([elementName isEqualToString:@"Ask"])
+    {
+        ask = [[NSMutableString alloc] init];
+    }
+    if ([elementName isEqualToString:@"High"])
+    {
+        high = [[NSMutableString alloc] init];
+    }
+    if ([elementName isEqualToString:@"Low"])
+    {
+        low = [[NSMutableString alloc] init];
+    }
+    if ([elementName isEqualToString:@"Direction"])
+    {
+        direction = [[NSMutableString alloc] init];
+    }
+    if ([elementName isEqualToString:@"Last"])
     {
         last = [[NSMutableString alloc] init];
     }
+    
+    
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
@@ -149,24 +156,74 @@
         currentElementValue = [[NSMutableString alloc] initWithString:string];
     }
     [currentElementValue appendString:string];
-    
-    //NSLog(@"Processing value for: %@", string);
 }
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
+    if ([elementName isEqualToString:@"Rate"])
+    {
+        return;
+    }
     if( [elementName isEqualToString:@"Bid"])
     {
         [bid setString:currentElementValue];
-        //NSLog(@"Processing value for bid: %@", bid);
+        currentElementValue = nil;
+        return;
     }
-    else if( [elementName isEqualToString:@"Last"])
+    if ([elementName isEqualToString:@"Ask"])
+    {
+        [ask setString:currentElementValue];
+        currentElementValue = nil;
+        return;
+    }
+    if ([elementName isEqualToString:@"High"])
+    {
+        [high setString:currentElementValue];
+        currentElementValue = nil;
+        return;
+    }
+    if ([elementName isEqualToString:@"Low"])
+    {
+        [low setString:currentElementValue];
+        currentElementValue = nil;
+        return;
+    }
+    if ([elementName isEqualToString:@"Direction"])
+    {
+        [direction setString:currentElementValue];
+        currentElementValue = nil;
+        return;
+    }
+    if( [elementName isEqualToString:@"Last"])
     {
         [last setString:currentElementValue];
-        //NSLog(@"Processing value for last: %@", last);
+        currentElementValue = nil;
+        //return;
+    }
+    
+    NSLog(@"Symbol: %@, Bid: %@, Ask: %@, High: %@, Low: %@, Direction: %@, Last: %@", symbol, bid, ask, high, low, direction, last);
+    
+    CurrencyCustomClass *item = [[CurrencyCustomClass alloc] initWithName:symbol rateBid:bid rateAsk:ask rateHigh:high rateLow:low rateDirection:direction rateLast:last];
+    if (item != nil)
+    {
+        [rates addObject:item];
     }
 
     currentElementValue = nil;
+}
+
+-(IBAction)onReload:(id)sender
+{
+    [_myTableView reloadData];
+    [self loadTheXML];
+}
+
+- (void)loadTheXML
+{
+	NSURL *pathURL = [NSURL URLWithString:@"http://rates.fxcm.com/RatesXML"];
+	NSXMLParser *parser = [[NSXMLParser alloc] initWithContentsOfURL:pathURL];
+	[parser setDelegate:self];
+	[parser parse];
 }
 
 -(NSData*)GetFileDataFromFile:(NSString*)filename

@@ -14,6 +14,10 @@
     IBOutlet UILabel *titleLabel;
     IBOutlet UILabel *secondaryLabel;
     IBOutlet UILabel *information2Label;
+    IBOutlet UILabel *information3Label;
+    IBOutlet UILabel *information4Label;
+    IBOutlet UILabel *information5Label;
+    IBOutlet UILabel *information6Label;
 }
 
 @property (nonatomic, strong)CurrencyCustomClass *currentRates;

@@ -7,7 +7,6 @@
 //  MDF1 project 4
 
 #import <UIKit/UIKit.h>
-#import "AppDelegate.h"
 #import "CurrencyCustomClass.h"
 #import "DataManager.h"
 
@@ -18,13 +17,16 @@
     NSURLRequest *request;
     NSURL *url;
     NSURLConnection *connection;
-    
     NSMutableData *requestData;
     NSMutableString *currencyString;
     NSMutableArray *rates;
     
     NSMutableString *symbol;
     NSMutableString *bid;
+    NSMutableString *ask;
+    NSMutableString *high;
+    NSMutableString *low;
+    NSMutableString *direction;
     NSMutableString *last;
     
     NSMutableString *currentElementValue;
@@ -34,9 +36,6 @@
 }
 
 @property (weak, nonatomic) IBOutlet UITableView *_myTableView;
-@property (nonatomic, retain) CurrencyCustomClass *_symbol;
-@property (nonatomic, retain) CurrencyCustomClass *_bid;
-@property (nonatomic, retain) CurrencyCustomClass *_last;
 
 -(IBAction)onClick:(id)sender;
 -(IBAction)onReload:(id)sender;

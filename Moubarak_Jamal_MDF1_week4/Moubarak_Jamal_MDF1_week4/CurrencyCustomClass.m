@@ -9,14 +9,18 @@
 #import "CurrencyCustomClass.h"
 
 @implementation CurrencyCustomClass
-@synthesize symbol, bid, last;
+@synthesize symbol, bid, ask, high, low, direction, last;
 
--(id)initWithName: (NSString*)rateSymbol rateBid:(NSString*)rateBid rateLast:(NSString*)rateLast
+-(id)initWithName: (NSString*)rateSymbol rateBid:(NSString*)rateBid rateAsk:(NSString*)rateAsk rateHigh:(NSString*)rateHigh rateLow:(NSString*)rateLow rateDirection:(NSString*)rateDirection rateLast:(NSString*)rateLast
 {
     if ((self = [super init]))
     {
         symbol = rateSymbol;
         bid = rateBid;
+        ask = rateAsk;
+        high = rateHigh;
+        low = rateLow;
+        direction = rateDirection;
         last = rateLast;
     }
     return self;
